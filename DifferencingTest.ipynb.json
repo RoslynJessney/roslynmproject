@@ -1,0 +1,187 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "from scipy import signal\n",
+    "from scipy.fft import fftshift\n",
+    "import matplotlib.pyplot as plt"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "3\n",
+      "5\n",
+      "[[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]]\n"
+     ]
+    }
+   ],
+   "source": [
+    "#testing differencing part on a small scale to ensure offset carries through as expected \n",
+    "#before applying to larger dataset\n",
+    "\n",
+    "array=[[1,2,4,7,11],[6,7,9,12,16],[11,12,14,17,21]]\n",
+    "print(len(array))\n",
+    "lent=len(array[0])\n",
+    "print(lent)\n",
+    "\n",
+    "\n",
+    "new=[]\n",
+    "slice0=[]\n",
+    "\n",
+    "for i in range(0,lent):\n",
+    "    slice0.clear()\n",
+    "    for j in range(0,len(array)):\n",
+    "        slice0.append(array[j][i])\n",
+    "    new.append(slice0[:])\n",
+    "\n",
+    "#print(new)\n",
+    "\n",
+    "diff1=[]\n",
+    "slice1=[]\n",
+    "\n",
+    "for j in range(0,len(array)):\n",
+    "    slice1.clear()\n",
+    "    for i in range(0,lent-1):\n",
+    "        slice1.append(new[i+1][j]-new[i][j])\n",
+    "    diff1.append(slice1[:])\n",
+    "        \n",
+    "print(diff1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "3\n",
+      "5\n",
+      "[[1, 6, 11], [2, 7, 12], [9, 14, 19], [7, 12, 17], [11, 16, 21]]\n",
+      "[[1, 7, -2, 4], [1, 7, -2, 4], [1, 7, -2, 4]]\n"
+     ]
+    }
+   ],
+   "source": [
+    "#this is how offset introduced in 'ComplexTimeDifferencing'\n",
+    "array=[[1,2,4,7,11],[6,7,9,12,16],[11,12,14,17,21]]\n",
+    "print(len(array))\n",
+    "lent=len(array[0])\n",
+    "print(lent)\n",
+    "\n",
+    "\n",
+    "new=[]\n",
+    "slice0=[]\n",
+    "\n",
+    "for i in range(0,lent):\n",
+    "    slice0.clear()\n",
+    "    for j in range(0,len(array)):\n",
+    "        if i==2:\n",
+    "            slice0.append(array[j][i]+5)\n",
+    "        else:\n",
+    "            slice0.append(array[j][i])\n",
+    "    new.append(slice0[:])\n",
+    "\n",
+    "print(new)\n",
+    "\n",
+    "diff1=[]\n",
+    "slice1=[]\n",
+    "\n",
+    "for j in range(0,len(array)):\n",
+    "    slice1.clear()\n",
+    "    for i in range(0,lent-1):\n",
+    "        slice1.append(new[i+1][j]-new[i][j])\n",
+    "    diff1.append(slice1[:])\n",
+    "        \n",
+    "print(diff1)\n",
+    "#so adding five at that point does not only change one column in the spectrogram\n",
+    "#explains why didnt see one clear offset"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "3\n",
+      "5\n",
+      "[[1, 2, 8, 4], [1, 2, 8, 4], [1, 2, 8, 4]]\n"
+     ]
+    }
+   ],
+   "source": [
+    "array=[[1,2,4,7,11],[6,7,9,12,16],[11,12,14,17,21]]\n",
+    "print(len(array))\n",
+    "lent=len(array[0])\n",
+    "print(lent)\n",
+    "\n",
+    "\n",
+    "new=[]\n",
+    "slice0=[]\n",
+    "\n",
+    "for i in range(0,lent):\n",
+    "    slice0.clear()\n",
+    "    for j in range(0,len(array)):\n",
+    "        slice0.append(array[j][i])\n",
+    "    new.append(slice0[:])\n",
+    "\n",
+    "#print(new)\n",
+    "\n",
+    "diff1=[]\n",
+    "slice1=[]\n",
+    "\n",
+    "for j in range(0,len(array)):\n",
+    "    slice1.clear()\n",
+    "    for i in range(0,lent-1):\n",
+    "        if i==2:\n",
+    "             slice1.append(new[i+1][j]-new[i][j]+5)\n",
+    "        else:\n",
+    "            slice1.append(new[i+1][j]-new[i][j])\n",
+    "    diff1.append(slice1[:])\n",
+    "        \n",
+    "print(diff1)\n",
+    "\n",
+    "#introducing offset this way should give expected difference "
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
